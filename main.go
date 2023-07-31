@@ -44,9 +44,7 @@ func (p *XBPush) start() {
 // 定时获取线报
 func (p *XBPush) getXB() {
 	go p.start()
-	p.Cron.Every(15).Second().Do(func() {
-		p.xb()
-	})
+	p.Cron.Every(15).Second().Do(p.xb)
 }
 
 type XBResponse struct {

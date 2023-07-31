@@ -18,8 +18,8 @@ func main() {
 	p := NewXBPush()
 	p.getXB()
 
-	fmt.Println("http serve run :10097")
-	http.ListenAndServe(":10097", nil)
+	fmt.Println("http serve run :10098")
+	http.ListenAndServe(":10098", nil)
 }
 
 type XBPusher interface {

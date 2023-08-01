@@ -12,7 +12,7 @@ import (
 )
 
 // 推送token
-var pushToken = []string{"6ec18e8d7c934acc8759d000ac5e05a9"}
+var pushToken = []string{""}
 
 func main() {
 	p := NewXBPush()

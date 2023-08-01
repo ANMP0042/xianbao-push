@@ -69,12 +69,13 @@ func (p *XBPush) xb() {
 		fmt.Println("获取线报错误：", err.Error())
 	}
 	for _, xbResponse := range response {
-		go p.push(&xbResponse)
+		fmt.Println(xbResponse.Content)
+		go p.push(xbResponse)
 	}
 }
 
 // 推送
-func (p *XBPush) push(result *XBResponse) {
+func (p *XBPush) push(result XBResponse) {
 	if ok := p.pushRule(result); !ok {
 		return
 	}
@@ -86,7 +87,7 @@ func (p *XBPush) push(result *XBResponse) {
 }
 
 // 推送参数
-func (p *XBPush) pushParam(token string, result *XBResponse) string {
+func (p *XBPush) pushParam(token string, result XBResponse) string {
 	xbTime := time.Unix(result.Shijianchuo, 0).Format("2006-01-02 15:04:05")
 	content := fmt.Sprintf(`<a href="http://new.xianbao.fun/%s">%s</a>
 	<span>时间：%s</span>`, result.Url, result.Title, xbTime)
@@ -98,8 +99,11 @@ func (p *XBPush) pushParam(token string, result *XBResponse) string {
 }
 
 // 配置推送规则 需要的内容才推送
-func (p *XBPush) pushRule(result *XBResponse) bool {
-	substr := []string{"bug", "牛奶", "T恤", "纸巾"}
+func (p *XBPush) pushRule(result XBResponse) bool {
+	//fmt.Println(result)
+
+	substr := []string{"bug", "旺旺", "工行"}
+
 	if !p.containsRule(result.Content, substr) {
 		return false
 	}

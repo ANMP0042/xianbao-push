@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-co-op/gocron"
+	"github.com/patrickmn/go-cache"
 	"github.com/valyala/fasthttp"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -27,13 +29,15 @@ type XBPusher interface {
 }
 
 type XBPush struct {
-	Cron *gocron.Scheduler
+	Cron  *gocron.Scheduler
+	Cache *cache.Cache
 }
 
 func NewXBPush() XBPusher {
 	timezone, _ := time.LoadLocation("Asia/Shanghai")
 	return &XBPush{
-		Cron: gocron.NewScheduler(timezone),
+		Cron:  gocron.NewScheduler(timezone),
+		Cache: cache.New(cache.DefaultExpiration, 0),
 	}
 }
 
@@ -80,6 +84,7 @@ func (p *XBPush) push(result XBResponse) {
 	}
 	domain := "http://www.pushplus.plus/send"
 	for _, token := range pushToken {
+		go p.Cache.Set(strconv.Itoa(result.Id), "", 10*time.Minute)
 		pushUrl := fmt.Sprintf("%s?%s", domain, p.pushParam(token, result))
 		fasthttpGet(pushUrl, nil)
 	}
@@ -99,15 +104,17 @@ func (p *XBPush) pushParam(token string, result XBResponse) string {
 
 // 配置推送规则 需要的内容才推送
 func (p *XBPush) pushRule(result XBResponse) bool {
-	//fmt.Println(result)
-
-	substr := []string{"bug", "猫超", "工行"}
+	substr := []string{"bug", "猫超", "牛奶"}
 
 	if !p.containsRule(result.Content, substr) {
 		return false
 	}
 
 	if !p.pushTimeRule() {
+		return false
+	}
+
+	if !p.repeatXB(result.Id) {
 		return false
 	}
 	return true
@@ -133,6 +140,15 @@ func (p *XBPush) pushTimeRule() bool {
 	end := 23
 
 	if time.Now().Hour() <= end && time.Now().Hour() >= begin {
+		return true
+	}
+	return false
+}
+
+// 重复的线报
+func (p *XBPush) repeatXB(id int) bool {
+	_, exist := p.Cache.Get(strconv.Itoa(id))
+	if !exist {
 		return true
 	}
 	return false

@@ -12,7 +12,7 @@ import (
 )
 
 // 推送token
-var pushToken = []string{"token1", "token2"}
+var pushToken = []string{"6ec18e8d7c934acc8759d000ac5e05a9"}
 
 func main() {
 	p := NewXBPush()
@@ -69,7 +69,6 @@ func (p *XBPush) xb() {
 		fmt.Println("获取线报错误：", err.Error())
 	}
 	for _, xbResponse := range response {
-		fmt.Println(xbResponse.Content)
 		go p.push(xbResponse)
 	}
 }
@@ -102,7 +101,7 @@ func (p *XBPush) pushParam(token string, result XBResponse) string {
 func (p *XBPush) pushRule(result XBResponse) bool {
 	//fmt.Println(result)
 
-	substr := []string{"bug", "旺旺", "工行"}
+	substr := []string{"bug", "猫超", "工行"}
 
 	if !p.containsRule(result.Content, substr) {
 		return false
